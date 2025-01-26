@@ -13,7 +13,6 @@ from numpy import number as np_number
 from pandas import DataFrame, Series
 from sys import float_info as sflt
 
-
 # Generic types
 T = TypeVar("T")
 
@@ -46,7 +45,7 @@ DTypeLike = Any
 PandasDTypeLike = Any
 Shape = Tuple[int, ...]
 RelaxedShape = Union[int, Shape]
-Array = ndarray  # ready to be used for n-dim data
+Array = ndarray
 Array1d = ndarray
 Array2d = ndarray
 Array3d = ndarray

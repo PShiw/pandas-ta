@@ -1,24 +1,82 @@
 # -*- coding: utf-8 -*-
-from numpy import append, array, empty_like, nan, roll, zeros_like
+from numpy import (
+    append,
+    arange,
+    array,
+    empty_like,
+    float64,
+    int64,
+    isnan,
+    maximum,
+    nan,
+    roll,
+    where,
+    zeros_like
+)
+from numba import njit
 
 from pandas_ta._typing import Array, Int, IntFloat
 
-try:
-    from numba import njit
-except ImportError:
-    def njit(_): return _
+__all__ = [
+    "nb_ffill",
+    "nb_idiff",
+    "nb_prenan",
+    "nb_prepend",
+    "nb_rolling",
+    "nb_shift",
+]
 
 
-# Utilities
-@njit
-def np_prepend(x: Array, n: Int, value: IntFloat = nan) -> Array:
-    """Append array x to an array of values, typically nan."""
+
+# Numba version of ffill()
+@njit(cache=True)
+def nb_ffill(x):
+    mask = isnan(x)
+    idx = zeros_like(mask, dtype=int64)
+    last_valid_idx = -1
+
+    m = mask.size
+    for i in range(m):
+        if not mask[i]:
+            last_valid_idx = i
+        idx[i] = last_valid_idx
+    return x[idx]
+
+
+# Indexwise element difference by k indices of array x.
+# Similar to Pandas Series/DataFrame diff()
+@njit(cache=True)
+def nb_idiff(x, k):
+    n, k = x.size, int(k)
+    result = zeros_like(x, dtype=float64)
+
+    for i in range(k, n):
+        result[i] = x[i] - x[i - k]
+    result[:k] = nan
+
+    return result
+
+
+# Prepend n values, typically np.nan, to array x.
+@njit(cache=True)
+def nb_prenan(x, n, value = nan):
+    if n > 0:
+        x[:n - 1] = value
+        return x
+    return x
+
+
+# Prepend n values, typically np.nan, to array x.
+@njit(cache=True)
+def nb_prepend(x, n, value = nan):
     return append(array([value] * n), x)
 
 
-@njit
-def np_rolling(x: Array, n: Int, fn = None) -> Array:
-    """Like Pandas Rolling Window. x.rolling(n).fn()"""
+# Like Pandas Rolling Window. x.rolling(n).fn()
+@njit(cache=True)
+def nb_rolling(x, n, fn = None):
+    if fn is None:
+        return x
     m = x.size
     result = zeros_like(x, dtype=float)
     if n <= 0:
@@ -30,13 +88,12 @@ def np_rolling(x: Array, n: Int, fn = None) -> Array:
     result[:n - 1] = nan
     return result
 
+# np shift
+# shift5 - preallocate empty array and assign slice by chrisaycock
+# https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
+@njit(cache=True)
+def nb_shift(x, n, value = nan):
 
-@njit
-def np_shift(x: Array, n: Int, value: IntFloat = nan) -> Array:
-    """np shift
-    shift5 - preallocate empty array and assign slice by chrisaycock
-    https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
-    """
     result = empty_like(x)
     if n > 0:
         result[:n] = value
@@ -50,8 +107,8 @@ def np_shift(x: Array, n: Int, value: IntFloat = nan) -> Array:
 
 
 # Uncategorized
-# @njit
-# def np_roofing_filter(x: Array, n: Int, k: Int, pi: Float, sqrt2: Float):
+# @njit(cache=True)
+# def nb_roofing_filter(x: Array, n: Int, k: Int, pi: Float, sqrt2: Float):
 #     """Ehler's Roofing Filter (INCOMPLETE)
 #     http://traders.com/documentation/feedbk_docs/2014/01/traderstips.html"""
 #     m, hp = x.size, np.copy(x)
@@ -66,5 +123,5 @@ def np_shift(x: Array, n: Int, value: IntFloat = nan) -> Array:
 #         hp = c * c * (x[i] - 2 * x[i - 1] + x[i - 2]) \
 #             + 2 * b * hp[i - 1] - b * b * hp[i - 2]
 
-#     result = np_ssf(hp, k, pi, rsqrt2)
+#     result = nb_ssf(hp, k, pi, rsqrt2)
 #     return result
