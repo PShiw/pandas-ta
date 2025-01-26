@@ -88,12 +88,12 @@ def nb_rolling(x, n, fn = None):
     result[:n - 1] = nan
     return result
 
-
 # np shift
 # shift5 - preallocate empty array and assign slice by chrisaycock
 # https://stackoverflow.com/questions/30399534/shift-elements-in-a-numpy-array
 @njit(cache=True)
 def nb_shift(x, n, value = nan):
+
     result = empty_like(x)
     if n > 0:
         result[:n] = value

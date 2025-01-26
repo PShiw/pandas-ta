@@ -87,10 +87,10 @@ def v_ascending(var: bool) -> bool:
     """Returns True by default"""
     return partial(v_bool, default=True)(var=var)
 
-
 def v_datetime_ordered(df: SeriesFrame) -> bool:
     if df.shape[0] < 2:
         return False
+
     if is_datetime64_any_dtype(df.index):
         np_dt_index = df.index.to_numpy()
         if np_dt_index[0] < np_dt_index[-1]:
@@ -109,15 +109,16 @@ def v_list(var: List, default: List = []) -> List:
         return var
     return default
 
-
 def v_lowerbound(
     var: IntFloat, bound: IntFloat = 0,
     default: IntFloat = 0, strict: bool = True, complement: bool = False
 ) -> IntFloat:
     """Returns the default if var(iable) not greater(equal) than bound."""
     var_type = None
+
     if isinstance(var, (float, np_floating)): var_type = float
     if isinstance(var, (int, np_integer)): var_type = int
+
 
     if var_type is None:
         return default
@@ -139,10 +140,10 @@ def v_mamode(var: str, default: str) -> str: # Could be an alias.
     return v_str(var, default)
 
 
+
 def v_offset(var: Int) -> Int:
     """Defaults to 0"""
     return partial(v_int, default=0, ne=0)(var=var)
-
 
 def v_pos_default(
     var: IntFloat, default: IntFloat = 0, strict: bool = True, complement: bool = False
@@ -158,6 +159,7 @@ def v_scalar(var: IntFloat, default: Optional[IntFloat] = 1) -> Float:
     return float(default)
 
 
+
 def v_series(series: Series, length: Optional[IntFloat] = 0) -> Optional[Series]:
     """Returns None if the Pandas Series does not meet the minimum length
     required for the indicator."""
@@ -166,11 +168,9 @@ def v_series(series: Series, length: Optional[IntFloat] = 0) -> Optional[Series]
             return series
     return None
 
-
 def v_talib(var: bool) -> bool:
     """Returns True by default"""
     return partial(v_bool, default=True)(var=var)
-
 
 def v_tradingview(var: bool) -> bool:
     """Returns True by default"""

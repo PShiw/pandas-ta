@@ -4,7 +4,6 @@ from multiprocessing import cpu_count, Pool
 from pathlib import Path
 from time import perf_counter
 from warnings import simplefilter
-
 from numpy import log10, ndarray
 from pandas.api.extensions import register_dataframe_accessor
 from pandas.errors import PerformanceWarning

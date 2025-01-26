@@ -4,7 +4,6 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 from sys import float_info as sflt
-
 from numpy import argmax, argmin, finfo, float64
 from numba import njit
 from pandas import DataFrame, Series
@@ -81,7 +80,7 @@ def recent_maximum_index(x) -> Int:
 def recent_minimum_index(x) -> Int:
     return int(argmin(x[::-1]))
 
-
+  
 def rma_pandas(series: Series, length: Int):
     series = v_series(series)
     alpha = (1.0 / length) if length > 0 else 0.5
